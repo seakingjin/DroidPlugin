@@ -79,6 +79,7 @@ public class INotificationManagerHookHandle extends BaseHookHandle {
         sHookedMethodHandlers.put("cancelNotificationWithTag", new cancelNotificationWithTag(mHostContext));
         sHookedMethodHandlers.put("setNotificationsEnabledForPackage", new setNotificationsEnabledForPackage(mHostContext));
         sHookedMethodHandlers.put("areNotificationsEnabledForPackage", new areNotificationsEnabledForPackage(mHostContext));
+        sHookedMethodHandlers.put("removeEdgeNotification", new removeEdgeNotification(mHostContext));
     }
 //    public void cancelAllNotifications(String pkg, int userId);
 //    public void enqueueToast(String pkg, ITransientNotification callback, int duration);
@@ -144,6 +145,27 @@ public class INotificationManagerHookHandle extends BaseHookHandle {
         }
         return -1;
     }
+
+  private class removeEdgeNotification extends HookedMethodHandler {
+     public removeEdgeNotification(Context context) {
+         super(context);
+    }
+
+    @Override
+    protected boolean beforeInvoke(Object receiver, Method method, Object[] args) throws Throwable {
+        int index = 0;
+        if (args != null && args.length > index) {
+            if (args[index] instanceof String) {
+                String pkg = (String) args[index];
+                if (!TextUtils.equals(pkg, mHostContext.getPackageName())) {
+                    args[index] = mHostContext.getPackageName();
+                }
+            }
+        }
+        return super.beforeInvoke(receiver, method, args);
+    }
+  }
+
 
     private class MyNotification extends HookedMethodHandler {
         public MyNotification(Context context) {
